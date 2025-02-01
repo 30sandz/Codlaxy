@@ -1,0 +1,178 @@
+/* Custom styles for Codlaxy */
+
+/* Line clamp utility classes */
+.line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* Hover animations */
+.hover-scale {
+    transition: transform 0.2s ease-in-out;
+}
+
+.hover-scale:hover {
+    transform: scale(1.02);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #666;
+}
+
+/* Loading spinner */
+.loading-spinner {
+    border: 3px solid #f3f3f3;
+    border-radius: 50%;
+    border-top: 3px solid #3b82f6;
+    width: 24px;
+    height: 24px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Form focus states */
+.form-input:focus {
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+/* Custom badge styles */
+.badge-startup {
+    background-color: #e0f2fe;
+    color: #0369a1;
+}
+
+.badge-skill {
+    background-color: #f0fdf4;
+    color: #166534;
+}
+
+.badge-recognition {
+    background-color: #fef3c7;
+    color: #92400e;
+}
+
+/* Project card transitions */
+.project-card {
+    transition: all 0.3s ease;
+}
+
+.project-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* Like button animation */
+.like-button {
+    transition: transform 0.15s ease;
+}
+
+.like-button:active {
+    transform: scale(0.9);
+}
+
+/* Custom tooltip */
+.tooltip {
+    position: relative;
+}
+
+.tooltip:before {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 4px 8px;
+    background-color: #1f2937;
+    color: white;
+    font-size: 12px;
+    border-radius: 4px;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.2s ease;
+}
+
+.tooltip:hover:before {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Mobile menu animation */
+.mobile-menu {
+    transition: transform 0.3s ease-in-out;
+    transform: translateX(-100%);
+}
+
+.mobile-menu.open {
+    transform: translateX(0);
+}
+
+/* File input styling */
+.file-input-wrapper {
+    position: relative;
+    overflow: hidden;
+    display: inline-block;
+}
+
+.file-input-wrapper input[type=file] {
+    position: absolute;
+    left: 0;
+    top: 0;
+    opacity: 0;
+    cursor: pointer;
+}
+
+/* Custom checkbox style */
+.custom-checkbox {
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border: 2px solid #d1d5db;
+    border-radius: 4px;
+    outline: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.custom-checkbox:checked {
+    background-color: #3b82f6;
+    border-color: #3b82f6;
+}
+
+.custom-checkbox:checked:after {
+    content: '';
+    display: block;
+    width: 4px;
+    height: 8px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+    margin: 2px 5px;
+} 

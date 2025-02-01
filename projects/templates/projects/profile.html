@@ -1,0 +1,212 @@
+{% extends 'projects/base.html' %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Profile Header -->
+    <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+        <div class="px-4 py-5 sm:px-6">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 h-20 w-20">
+                        {% if profile.profile_picture and profile.profile_picture.url %}
+                            <img class="h-20 w-20 rounded-full object-cover border border-gray-200"
+                                 src="{{ profile.profile_picture.url }}"
+                                 alt="{{ profile.user.username }}">
+                        {% else %}
+                            <div class="h-20 w-20 rounded-full bg-blue-100 flex items-center justify-center border border-gray-200">
+                                <span class="text-blue-600 font-bold text-2xl">{{ profile.user.username|make_list|first|upper }}</span>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="ml-4">
+                        <h1 class="text-2xl font-bold text-gray-900">
+                            {{ profile.user.username }}
+                        </h1>
+                        <p class="text-sm text-gray-500">
+                            {{ profile.college }}
+                        </p>
+                    </div>
+                </div>
+                {% if user == profile.user %}
+                <div>
+                    <a href="{% url 'projects:profile-edit' %}"
+                       class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                        <i class="fas fa-edit mr-2"></i>
+                        Edit Profile
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        <div class="border-t border-gray-200 px-4 py-5 sm:px-6">
+            <dl class="grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2">
+                <div class="sm:col-span-1">
+                    <dt class="text-sm font-medium text-gray-500">Most Recognized Role</dt>
+                    <dd class="mt-1 text-sm text-gray-900">{{ profile.most_recognized_role }}</dd>
+                </div>
+                <div class="sm:col-span-1">
+                    <dt class="text-sm font-medium text-gray-500">Awards</dt>
+                    <dd class="mt-1 text-sm text-gray-900">{{ profile.awards }}</dd>
+                </div>
+                <div class="sm:col-span-2">
+                    <dt class="text-sm font-medium text-gray-500">Links</dt>
+                    <dd class="mt-1 flex space-x-4">
+                        {% if profile.github_link %}
+                        <a href="{{ profile.github_link }}" target="_blank" rel="noopener noreferrer"
+                           class="text-gray-400 hover:text-gray-500">
+                            <i class="fab fa-github text-xl"></i>
+                        </a>
+                        {% endif %}
+                        {% if profile.linkedin_link %}
+                        <a href="{{ profile.linkedin_link }}" target="_blank" rel="noopener noreferrer"
+                           class="text-gray-400 hover:text-gray-500">
+                            <i class="fab fa-linkedin text-xl"></i>
+                        </a>
+                        {% endif %}
+                        {% if profile.portfolio_link %}
+                        <a href="{{ profile.portfolio_link }}" target="_blank" rel="noopener noreferrer"
+                           class="text-gray-400 hover:text-gray-500">
+                            <i class="fas fa-globe text-xl"></i>
+                        </a>
+                        {% endif %}
+                    </dd>
+                </div>
+            </dl>
+        </div>
+    </div>
+
+    <!-- Projects Tabs -->
+    <div class="mt-6">
+        <div class="sm:hidden">
+            <label for="tabs" class="sr-only">Select a tab</label>
+            <select id="tabs" name="tabs"
+                    class="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md">
+                <option selected>Owned Projects</option>
+                <option>Team Projects</option>
+            </select>
+        </div>
+        <div class="hidden sm:block">
+            <div class="border-b border-gray-200">
+                <nav class="-mb-px flex space-x-8" aria-label="Tabs">
+                    <button class="tab-button whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm border-blue-500 text-blue-600"
+                            data-tab="owned">
+                        Owned Projects
+                        <span class="ml-2 py-0.5 px-2.5 text-xs font-medium text-blue-600 bg-blue-100 rounded-full">
+                            {{ owned_projects|length }}
+                        </span>
+                    </button>
+                    <button class="tab-button whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                            data-tab="team">
+                        Team Projects
+                        <span class="ml-2 py-0.5 px-2.5 text-xs font-medium text-gray-600 bg-gray-100 rounded-full">
+                            {{ team_projects|length }}
+                        </span>
+                    </button>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Owned Projects -->
+        <div id="owned-projects" class="tab-content mt-6">
+            <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {% for project in owned_projects %}
+                <div class="bg-white overflow-hidden shadow rounded-lg hover:shadow-lg transition-shadow duration-300 ease-in-out">
+                    <div class="p-6">
+                        <div class="flex items-center">
+                            <div class="flex-1">
+                                <a href="{% url 'projects:project-detail' project.pk %}" class="block">
+                                    <h3 class="text-lg font-medium text-gray-900">{{ project.title }}</h3>
+                                </a>
+                                <p class="mt-1 text-sm text-gray-500">
+                                    {{ project.description|truncatechars:100 }}
+                                </p>
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                {{ project.get_category_display }}
+                            </span>
+                            <span class="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {% if project.status == 'ongoing' %}bg-green-100 text-green-800{% else %}bg-gray-100 text-gray-800{% endif %}">
+                                {{ project.get_status_display }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-span-full text-center py-12">
+                    <i class="fas fa-folder-open text-4xl text-gray-400"></i>
+                    <p class="mt-2 text-sm text-gray-500">No owned projects yet</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Team Projects -->
+        <div id="team-projects" class="tab-content mt-6 hidden">
+            <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {% for project in team_projects %}
+                <div class="bg-white overflow-hidden shadow rounded-lg hover:shadow-lg transition-shadow duration-300 ease-in-out">
+                    <div class="p-6">
+                        <div class="flex items-center">
+                            <div class="flex-1">
+                                <a href="{% url 'projects:project-detail' project.pk %}" class="block">
+                                    <h3 class="text-lg font-medium text-gray-900">{{ project.title }}</h3>
+                                </a>
+                                <p class="mt-1 text-sm text-gray-500">
+                                    {{ project.description|truncatechars:100 }}
+                                </p>
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                {{ project.get_category_display }}
+                            </span>
+                            <span class="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {% if project.status == 'ongoing' %}bg-green-100 text-green-800{% else %}bg-gray-100 text-gray-800{% endif %}">
+                                {{ project.get_status_display }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-span-full text-center py-12">
+                    <i class="fas fa-users text-4xl text-gray-400"></i>
+                    <p class="mt-2 text-sm text-gray-500">No team projects yet</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+    $(document).ready(function() {
+        // Tab switching functionality
+        $('.tab-button').click(function() {
+            const tab = $(this).data('tab');
+            
+            // Update button styles
+            $('.tab-button').removeClass('border-blue-500 text-blue-600')
+                           .addClass('border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300');
+            $(this).removeClass('border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300')
+                   .addClass('border-blue-500 text-blue-600');
+            
+            // Show/hide content
+            $('.tab-content').addClass('hidden');
+            if (tab === 'owned') {
+                $('#owned-projects').removeClass('hidden');
+            } else {
+                $('#team-projects').removeClass('hidden');
+            }
+        });
+
+        // Mobile tab select
+        $('select[name="tabs"]').change(function() {
+            const tab = $(this).val() === 'Owned Projects' ? 'owned' : 'team';
+            $(`.tab-button[data-tab="${tab}"]`).click();
+        });
+    });
+</script>
+{% endblock %}
+
+{% endblock %} 

@@ -1,0 +1,77 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block head_title %}{% endblock %} | Codlaxy</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Authentication CSS -->
+    <link rel="stylesheet" href="{% static 'css/auth/auth.css' %}">
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="bg-gray-50">
+    <!-- Simple Navigation -->
+    <nav class="bg-white shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex">
+                    <div class="flex-shrink-0 flex items-center">
+                        <a href="{% url 'projects:landing' %}" class="text-2xl font-bold text-blue-600">
+                            Codlaxy
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Messages -->
+    {% if messages %}
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
+        {% for message in messages %}
+        <div class="rounded-md {% if message.tags == 'error' %}bg-red-50{% else %}bg-blue-50{% endif %} p-4">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    {% if message.tags == 'error' %}
+                    <i class="fas fa-exclamation-circle text-red-400"></i>
+                    {% else %}
+                    <i class="fas fa-info-circle text-blue-400"></i>
+                    {% endif %}
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm font-medium {% if message.tags == 'error' %}text-red-800{% else %}text-blue-800{% endif %}">
+                        {{ message }}
+                    </p>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Main Content -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Simple Footer -->
+    <footer class="bg-white mt-auto">
+        <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
+            <p class="text-center text-sm text-gray-500">
+                &copy; {% now "Y" %} Codlaxy. All rights reserved.
+            </p>
+        </div>
+    </footer>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html> 

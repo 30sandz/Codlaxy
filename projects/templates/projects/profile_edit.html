@@ -1,0 +1,129 @@
+{% extends 'projects/base.html' %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="md:grid md:grid-cols-3 md:gap-6">
+        <div class="md:col-span-1">
+            <div class="px-4 sm:px-0">
+                <h3 class="text-lg font-medium leading-6 text-gray-900">Profile</h3>
+                <p class="mt-1 text-sm text-gray-600">
+                    This information will be displayed publicly so be careful what you share.
+                </p>
+            </div>
+        </div>
+        <div class="mt-5 md:mt-0 md:col-span-2">
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="shadow sm:rounded-md sm:overflow-hidden">
+                    <div class="px-4 py-5 bg-white space-y-6 sm:p-6">
+                        <!-- Profile Picture -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">
+                                Profile Picture
+                            </label>
+                            <div class="mt-1 flex items-center">
+                                {% if profile.profile_picture %}
+                                <div class="mr-4">
+                                    <img src="{{ profile.profile_picture.url }}" alt="Current profile picture"
+                                         class="h-12 w-12 object-cover rounded-full">
+                                </div>
+                                {% endif %}
+                                <input type="file" name="profile_picture" id="id_profile_picture"
+                                       class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300">
+                            </div>
+                        </div>
+
+                        <!-- College -->
+                        <div>
+                            <label for="id_college" class="block text-sm font-medium text-gray-700">
+                                College/School
+                            </label>
+                            <div class="mt-1">
+                                <input type="text" name="college" id="id_college"
+                                       class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                                       value="{{ profile.college }}"
+                                       placeholder="Enter your college or school name">
+                            </div>
+                        </div>
+
+                        <!-- Most Recognized Role -->
+                        <div>
+                            <label for="id_most_recognized_role" class="block text-sm font-medium text-gray-700">
+                                Most Recognized Role
+                            </label>
+                            <div class="mt-1">
+                                <input type="text" name="most_recognized_role" id="id_most_recognized_role"
+                                       class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                                       value="{{ profile.most_recognized_role }}"
+                                       placeholder="e.g., Full Stack Developer, UI Designer">
+                            </div>
+                        </div>
+
+                        <!-- Awards -->
+                        <div>
+                            <label for="id_awards" class="block text-sm font-medium text-gray-700">
+                                Awards & Achievements
+                            </label>
+                            <div class="mt-1">
+                                <textarea id="id_awards" name="awards" rows="3"
+                                          class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border border-gray-300 rounded-md"
+                                          placeholder="List your notable awards and achievements">{{ profile.awards }}</textarea>
+                            </div>
+                        </div>
+
+                        <!-- Links -->
+                        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                            <div>
+                                <label for="id_github_link" class="block text-sm font-medium text-gray-700">
+                                    GitHub Profile
+                                </label>
+                                <div class="mt-1">
+                                    <input type="url" name="github_link" id="id_github_link"
+                                           class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                                           value="{{ profile.github_link }}"
+                                           placeholder="https://github.com/username">
+                                </div>
+                            </div>
+
+                            <div>
+                                <label for="id_linkedin_link" class="block text-sm font-medium text-gray-700">
+                                    LinkedIn Profile
+                                </label>
+                                <div class="mt-1">
+                                    <input type="url" name="linkedin_link" id="id_linkedin_link"
+                                           class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                                           value="{{ profile.linkedin_link }}"
+                                           placeholder="https://linkedin.com/in/username">
+                                </div>
+                            </div>
+
+                            <div class="sm:col-span-2">
+                                <label for="id_portfolio_link" class="block text-sm font-medium text-gray-700">
+                                    Portfolio Website
+                                </label>
+                                <div class="mt-1">
+                                    <input type="url" name="portfolio_link" id="id_portfolio_link"
+                                           class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                                           value="{{ profile.portfolio_link }}"
+                                           placeholder="https://your-portfolio.com">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="px-4 py-3 bg-gray-50 text-right sm:px-6">
+                        <a href="{% url 'projects:profile' profile.pk %}"
+                           class="inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 mr-3">
+                            Cancel
+                        </a>
+                        <button type="submit"
+                                class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                            Save Changes
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %} 

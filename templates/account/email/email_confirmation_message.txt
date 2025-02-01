@@ -1,0 +1,10 @@
+Hello from Codlaxy!
+
+You're receiving this email because user {{ user.username }} has given this as an email address to connect their account.
+
+To confirm this is correct, go to {{ activate_url }}
+
+If you did not request this verification, you can safely ignore this email.
+
+Best regards,
+The Codlaxy Team 

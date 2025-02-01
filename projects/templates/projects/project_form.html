@@ -1,0 +1,328 @@
+{% extends 'projects/base.html' %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="md:grid md:grid-cols-3 md:gap-6">
+        <div class="md:col-span-1">
+            <div class="px-4 sm:px-0">
+                <h3 class="text-lg font-medium leading-6 text-gray-900">
+                    {% if form.instance.pk %}
+                    Edit Project
+                    {% else %}
+                    Create Project
+                    {% endif %}
+                </h3>
+                <p class="mt-1 text-sm text-gray-600">
+                    {% if form.instance.pk %}
+                    Update your project details and requirements.
+                    {% else %}
+                    Share your project idea with the community and find collaborators.
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+        <div class="mt-5 md:mt-0 md:col-span-2">
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="shadow sm:rounded-md sm:overflow-hidden">
+                    <div class="px-4 py-5 bg-white space-y-6 sm:p-6">
+                        <!-- Title -->
+                        <div>
+                            <label for="id_title" class="block text-sm font-medium text-gray-700">
+                                Project Title
+                            </label>
+                            <div class="mt-1">
+                                <input type="text" name="title" id="id_title"
+                                       class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                                       value="{{ form.title.value|default:'' }}"
+                                       placeholder="Enter a descriptive title for your project">
+                            </div>
+                            {% if form.title.errors %}
+                            <p class="mt-2 text-sm text-red-600">{{ form.title.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+
+                        <!-- Description -->
+                        <div>
+                            <label for="id_description" class="block text-sm font-medium text-gray-700">
+                                Description
+                            </label>
+                            <div class="mt-1">
+                                <textarea id="id_description" name="description" rows="4"
+                                          class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border border-gray-300 rounded-md"
+                                          placeholder="Describe your project, its goals, and what you're looking to achieve">{{ form.description.value|default:'' }}</textarea>
+                            </div>
+                            {% if form.description.errors %}
+                            <p class="mt-2 text-sm text-red-600">{{ form.description.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+
+                        <!-- Category -->
+                        <div>
+                            <label for="id_category" class="block text-sm font-medium text-gray-700">
+                                Category
+                            </label>
+                            <select id="id_category" name="category"
+                                    class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md">
+                                {% for value, label in form.fields.category.choices %}
+                                <option value="{{ value }}" {% if form.category.value == value %}selected{% endif %}>
+                                    {{ label }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            {% if form.category.errors %}
+                            <p class="mt-2 text-sm text-red-600">{{ form.category.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+
+                        <!-- Technologies -->
+                        <div>
+                            <label for="id_technologies" class="block text-sm font-medium text-gray-700">
+                                Technologies
+                            </label>
+                            <div class="mt-1">
+                                <input type="text" name="technologies" id="id_technologies"
+                                       class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                                       value="
+                                       {% if form.technologies.value is iterable and form.technologies.value is not string %}{{ form.technologies.value|join:',' }}{% else %}{{ form.technologies.value }}{% endif %}
+                                       "
+                                       placeholder="Enter technologies separated by commas (e.g., Python, React, PostgreSQL)">
+                            </div>
+                            {% if form.technologies.errors %}
+                            <p class="mt-2 text-sm text-red-600">{{ form.technologies.errors.0 }}</p>
+                            {% endif %}
+                            <div id="technology-tags" class="mt-2 flex flex-wrap gap-2"></div>
+                        </div>
+
+                        <!-- Required Roles -->
+                        <div>
+                            <label for="id_required_roles" class="block text-sm font-medium text-gray-700">
+                                Required Roles
+                            </label>
+                            <div class="mt-1">
+                                <input type="text" name="required_roles" id="id_required_roles"
+                                       class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                                       value="{% if form.required_roles.value is iterable and form.required_roles.value is not string %}{{ form.required_roles.value|join:','}}{% else %}{{ form.required_roles.value }}{% endif %}"
+                                       placeholder="Enter required roles separated by commas (e.g., Frontend Developer, UI Designer)">
+                            </div>
+                            {% if form.required_roles.errors %}
+                            <p class="mt-2 text-sm text-red-600">{{ form.required_roles.errors.0 }}</p>
+                            {% endif %}
+                            <div id="role-tags" class="mt-2 flex flex-wrap gap-2"></div>
+                            
+                            <!-- Role Vacancies -->
+                            <div id="role-vacancies" class="mt-4 space-y-3">
+                                <!-- Dynamic vacancy inputs will be added here -->
+                            </div>
+                        </div>
+
+                        <!-- Project Logo -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">
+                                Project Logo
+                            </label>
+                            <div class="mt-1 flex items-center">
+                                {% if form.instance.project_logo %}
+                                <div class="mr-4">
+                                    <img src="{{ form.instance.project_logo.url }}" alt="Current project logo"
+                                         class="h-12 w-12 object-cover rounded-full">
+                                </div>
+                                {% endif %}
+                                <input type="file" name="project_logo" id="id_project_logo"
+                                       class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300">
+                            </div>
+                            {% if form.project_logo.errors %}
+                            <p class="mt-2 text-sm text-red-600">{{ form.project_logo.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+
+                        <!-- Links -->
+                        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                            <div>
+                                <label for="id_github_link" class="block text-sm font-medium text-gray-700">
+                                    GitHub Link
+                                </label>
+                                <div class="mt-1">
+                                    <input type="url" name="github_link" id="id_github_link"
+                                           class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                                           value="{{ form.github_link.value|default:'' }}"
+                                           placeholder="https://github.com/username/project">
+                                </div>
+                                {% if form.github_link.errors %}
+                                <p class="mt-2 text-sm text-red-600">{{ form.github_link.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+
+                            <div>
+                                <label for="id_linkedin_link" class="block text-sm font-medium text-gray-700">
+                                    LinkedIn Link
+                                </label>
+                                <div class="mt-1">
+                                    <input type="url" name="linkedin_link" id="id_linkedin_link"
+                                           class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                                           value="{{ form.linkedin_link.value|default:'' }}"
+                                           placeholder="https://linkedin.com/in/username">
+                                </div>
+                                {% if form.linkedin_link.errors %}
+                                <p class="mt-2 text-sm text-red-600">{{ form.linkedin_link.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+
+                            <div class="sm:col-span-2">
+                                <label for="id_demo_link" class="block text-sm font-medium text-gray-700">
+                                    Demo Link
+                                </label>
+                                <div class="mt-1">
+                                    <input type="url" name="demo_link" id="id_demo_link"
+                                           class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                                           value="{{ form.demo_link.value|default:'' }}"
+                                           placeholder="https://your-demo-site.com">
+                                </div>
+                                {% if form.demo_link.errors %}
+                                <p class="mt-2 text-sm text-red-600">{{ form.demo_link.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="px-4 py-3 bg-gray-50 text-right sm:px-6">
+                        <a href="{% url 'projects:project-list' %}"
+                           class="inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 mr-3">
+                            Cancel
+                        </a>
+                        <button type="submit"
+                                class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                            {% if form.instance.pk %}
+                            Update Project
+                            {% else %}
+                            Create Project
+                            {% endif %}
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+    function createTag(text, container, inputField) {
+        const tag = document.createElement('span');
+        tag.className = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800';
+        
+        const tagText = document.createElement('span');
+        tagText.textContent = text;
+        tag.appendChild(tagText);
+
+        const removeButton = document.createElement('button');
+        removeButton.className = 'ml-1.5 inline-flex items-center justify-center text-blue-400 hover:text-blue-600';
+        removeButton.innerHTML = '<i class="fas fa-times"></i>';
+        removeButton.onclick = function() {
+            tag.remove();
+            updateInputValue(container, inputField);
+            updateVacancyInputs();
+        };
+        tag.appendChild(removeButton);
+
+        container.appendChild(tag);
+    }
+
+    function updateInputValue(container, inputField) {
+        const tags = Array.from(container.children).map(tag => 
+            tag.firstChild.textContent.trim()
+        );
+        inputField.value = tags.join(',');
+    }
+
+    function updateVacancyInputs() {
+        const vacanciesContainer = document.getElementById('role-vacancies');
+        const roles = document.getElementById('id_required_roles').value
+            .split(',')
+            .map(role => role.trim())
+            .filter(role => role);
+
+        vacanciesContainer.innerHTML = '';
+        
+        roles.forEach(role => {
+            const div = document.createElement('div');
+            div.className = 'flex items-center space-x-2';
+            div.innerHTML = `
+                <label class="block text-sm font-medium text-gray-700 flex-grow">${role}</label>
+                <div class="w-24">
+                    <input type="number" 
+                           name="role_vacancies" 
+                           value="1" 
+                           min="1" 
+                           class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                           placeholder="Vacancies">
+                </div>
+            `;
+            vacanciesContainer.appendChild(div);
+        });
+    }
+
+    function handleInput(inputField, container) {
+        const value = inputField.value.trim();
+        if (!value) return;
+
+        const tags = value.split(',').map(tag => tag.trim()).filter(tag => tag);
+        container.innerHTML = '';
+        tags.forEach(tag => createTag(tag, container, inputField));
+        updateVacancyInputs();
+    }
+
+    // Set up technologies
+    const techInput = document.getElementById('id_technologies');
+    const techContainer = document.getElementById('technology-tags');
+    techInput.addEventListener('blur', () => handleInput(techInput, techContainer));
+    if (techInput.value) handleInput(techInput, techContainer);
+
+    // Set up required roles
+    const rolesInput = document.getElementById('id_required_roles');
+    const rolesContainer = document.getElementById('role-tags');
+    rolesInput.addEventListener('blur', () => {
+        handleInput(rolesInput, rolesContainer);
+        updateVacancyInputs();
+    });
+    if (rolesInput.value) {
+        handleInput(rolesInput, rolesContainer);
+        updateVacancyInputs();
+    }
+
+    // Form submission
+    document.querySelector('form').addEventListener('submit', function(e) {
+        const technologiesInput = document.getElementById('id_technologies');
+        const rolesInput = document.getElementById('id_required_roles');
+
+        // Clean up and validate technologies
+        const technologies = technologiesInput.value
+            .split(',')
+            .map(item => item.trim())
+            .filter(item => item);
+        
+        if (technologies.length === 0) {
+            e.preventDefault();
+            alert('Please specify at least one technology for your project.');
+            return;
+        }
+
+        // Clean up and validate roles
+        const roles = rolesInput.value
+            .split(',')
+            .map(item => item.trim())
+            .filter(item => item);
+        
+        if (roles.length === 0) {
+            e.preventDefault();
+            alert('Please specify at least one required role for your project.');
+            return;
+        }
+
+        technologiesInput.value = technologies.join(',');
+        rolesInput.value = roles.join(',');
+    });
+</script>
+{% endblock %}
+
+{% endblock %} 
