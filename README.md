@@ -1,6 +1,106 @@
-# Codlaxy - Tech Project Collaboration Platform
+# Codlaxy
 
-A dynamic platform for tech enthusiasts to collaborate on projects, form teams, and showcase their work. Users can create projects, specify required roles, and connect with potential team members.
+A Django-based web application for project management and collaboration.
+
+## Prerequisites
+
+- Docker and Docker Compose
+- Git
+
+## Development Setup
+
+1. Clone the repository:
+```bash
+git clone <repository-url>
+cd codlaxy
+```
+
+2. Environment Setup:
+   - Copy the example environment file:
+   ```bash
+   cp .env.example .env
+   ```
+   - Update the environment variables in `.env` if needed
+
+3. Build and start the containers:
+```bash
+docker-compose -f docker-compose.dev.yml up --build
+```
+
+This will start the following services:
+- Django web application (http://localhost:8000)
+- PostgreSQL database
+- Redis for caching
+- MailHog for email testing (http://localhost:8025)
+- PgAdmin for database management (http://localhost:5051)
+
+## Development URLs
+
+- Main application: http://localhost:8000
+- Email testing interface (MailHog): http://localhost:8025
+- Database admin (PgAdmin): http://localhost:5051
+  - Login Email: dev@codlaxy.com
+  - Login Password: devadmin
+  
+  After logging into PgAdmin, to connect to the database use:
+  - Host: db
+  - Port: 5432
+  - Database: codlaxy_dev
+  - Username: codlaxy_dev
+  - Password: codlaxy_dev
+
+## Database Migrations
+
+Migrations are automatically run when the container starts. If you need to run them manually:
+
+```bash
+docker-compose -f docker-compose.dev.yml exec web python manage.py migrate
+```
+
+## Creating a Superuser
+
+To create an admin user:
+
+```bash
+docker-compose -f docker-compose.dev.yml exec web python manage.py createsuperuser
+```
+
+## Development Tools
+
+- Django Debug Toolbar is enabled in development (accessible at `/__debug__/` when logged in as admin)
+- Django Extensions are installed for development utilities
+- Automatic email testing with MailHog
+- PostgreSQL database GUI with PgAdmin
+
+## Stopping the Application
+
+To stop the application:
+
+```bash
+docker-compose -f docker-compose.dev.yml down
+```
+
+To stop and remove all data (including database):
+
+```bash
+docker-compose -f docker-compose.dev.yml down -v
+```
+
+## Project Structure
+
+- `codlaxy/` - Main Django project directory
+  - `settings/` - Split settings files for different environments
+    - `base.py` - Base settings
+    - `development.py` - Development-specific settings
+    - `production.py` - Production settings
+- `projects/` - Projects app
+- `templates/` - HTML templates
+- `static/` - Static files (CSS, JS, images)
+- `media/` - User-uploaded files
+- `requirements/` - Python dependencies
+  - `base.txt` - Base requirements
+  - `development.txt` - Development requirements
+  - `production.txt` - Production requirements
 
 ## Key Features
 
@@ -28,84 +128,6 @@ A dynamic platform for tech enthusiasts to collaborate on projects, form teams, 
 - Database: PostgreSQL
 - Frontend: Tailwind CSS
 - Docker for containerization
-
-## Prerequisites
-
-- Docker and Docker Compose
-- Git
-
-## Running the Project
-
-1. Clone the repository:
-   ```bash
-   git clone <repository-url>
-   cd codlaxy
-   ```
-
-2. Start the Docker containers:
-   ```bash
-   docker-compose up -d
-   ```
-   This will start:
-   - Web application on port 8000
-   - PostgreSQL database on port 5432
-   - Redis on port 6379
-   - pgAdmin on port 5050
-
-3. Access the application:
-   - Main application: http://localhost:8000
-   - pgAdmin: http://localhost:5050
-     - Email: codlaxy@admin.com
-     - Password: admin
-
-4. Default database credentials:
-   - Database: codlaxy
-   - Username: codlaxy
-   - Password: codlaxy
-
-## Development
-
-To make changes to the project:
-
-1. Stop the containers:
-   ```bash
-   docker-compose down
-   ```
-
-2. Make your changes to the code
-
-3. Rebuild and start the containers:
-   ```bash
-   docker-compose up -d --build
-   ```
-
-## Project Structure
-
-- `projects/`: Main application directory
-  - `models.py`: Database models (User, Project, Application, etc.)
-  - `views.py`: View logic for handling requests
-  - `templates/`: HTML templates
-  - `templatetags/`: Custom template filters
-
-## Features in Detail
-
-1. **Project Creation**
-   - Title and description
-   - Category selection
-   - Technology stack
-   - Required roles with vacancy counts
-   - Project logo and links (GitHub, LinkedIn, Demo)
-
-2. **Role Management**
-   - Specify roles needed for the project
-   - Set number of vacancies per role
-   - Track applications and team members
-
-3. **User Interactions**
-   - Comment on projects
-   - Like projects
-   - Apply for roles
-   - Receive notifications
 
 ## Troubleshooting
 

@@ -1,9 +1,66 @@
+### Python ###
 test/
 **/__pycache__
 *.pyc
+*.pyo
+*.pyd
+.Python
+*.py[cod]
+*$py.class
+*.so
+.eggs/
+*.egg-info/
+*.egg
+
+### Virtual Environment ###
+venv/
+.venv/
+env/
+ENV/
+virtualenv/
+
+### Version Control ###
 .git
+.gitignore
+.gitattributes
+
+### Environment Files ###
 .env
 .env.*
+*.env
+
+### Cache and Temporary Files ###
 .pytest_cache/
 .coverage
 htmlcov/
+.tox/
+.cache
+.hypothesis/
+.mypy_cache/
+.pyre/
+.dmypy.json
+dmypy.json
+
+### IDE ###
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+### Logs and Local Files ###
+logs/
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+
+### Docker ###
+Dockerfile*
+docker-compose*
+.docker/
+
+### Documentation ###
+docs/
+*.md
+LICENSE

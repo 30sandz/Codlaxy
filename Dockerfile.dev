@@ -1,0 +1,55 @@
+FROM python:3.10-slim
+
+# Set environment variables
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
+ENV PYTHONPATH=/app:$PYTHONPATH
+
+# Create a non-root user first
+RUN useradd -m developer
+
+# Install system dependencies
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        postgresql-client \
+        netcat-traditional \
+        git \
+        curl \
+        build-essential \
+        libpq-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set up directories with correct ownership
+RUN mkdir -p /app /opt/venv /app/logs /app/media /app/static \
+    && chown -R developer:developer /app /opt/venv
+
+# Switch to non-root user
+USER developer
+
+# Set work directory
+WORKDIR /app
+
+# Create and activate virtual environment
+RUN python -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+# Install Python dependencies
+COPY --chown=developer:developer requirements/base.txt /app/requirements/base.txt
+COPY --chown=developer:developer requirements/development.txt /app/requirements/development.txt
+RUN pip install --no-cache-dir --upgrade pip \
+    && pip install --no-cache-dir -r requirements/base.txt \
+    && pip install --no-cache-dir -r requirements/development.txt \
+    && pip install --no-cache-dir debugpy \
+    && pip install --no-cache-dir python-dotenv
+
+# Copy project files with correct ownership
+COPY --chown=developer:developer . .
+
+# Make entrypoint script executable
+RUN chmod +x /app/scripts/entrypoint.dev.sh
+
+# Expose ports (Django, Debug)
+EXPOSE 8000 5678
+
+# Set entrypoint
+ENTRYPOINT ["/app/scripts/entrypoint.dev.sh"] 
