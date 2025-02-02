@@ -19,24 +19,38 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from django.http import HttpResponse, JsonResponse
+import os
 
 def health_check(request):
     try:
-        # Check if we can access settings
-        allowed_hosts = settings.ALLOWED_HOSTS
-        debug = settings.DEBUG
+        # Basic environment checks
+        env_vars = {
+            'DJANGO_SETTINGS_MODULE': os.getenv('DJANGO_SETTINGS_MODULE'),
+            'ALLOWED_HOSTS': os.getenv('ALLOWED_HOSTS'),
+            'DATABASE_URL': 'Set' if os.getenv('DATABASE_URL') else 'Not Set',
+            'DEBUG': os.getenv('DEBUG'),
+            'PORT': os.getenv('PORT')
+        }
         
-        # Get request information
-        host = request.get_host()
-        scheme = request.scheme
+        # Request information
+        request_info = {
+            'host': request.get_host(),
+            'scheme': request.scheme,
+            'path': request.path,
+            'method': request.method,
+        }
         
         return JsonResponse({
             'status': 'healthy',
-            'host': host,
-            'scheme': scheme,
-            'allowed_hosts': allowed_hosts,
-            'debug': debug
-        }, status=200)
+            'environment': env_vars,
+            'request': request_info,
+            'settings': {
+                'allowed_hosts': settings.ALLOWED_HOSTS,
+                'debug': settings.DEBUG,
+                'static_root': str(settings.STATIC_ROOT),
+                'database_config': 'configured' if 'default' in settings.DATABASES else 'not configured'
+            }
+        })
     except Exception as e:
         return JsonResponse({
             'status': 'error',
