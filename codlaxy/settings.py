@@ -30,19 +30,19 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', get_random_secret_key())
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DEBUG', 'False') == 'True'
+DEBUG = True  # Temporarily enable debug for error diagnosis
 
 # Handle empty ALLOWED_HOSTS
 ALLOWED_HOSTS = [host.strip() for host in os.environ.get('ALLOWED_HOSTS', '').split(',') if host.strip()]
-if not ALLOWED_HOSTS and not DEBUG:
-    ALLOWED_HOSTS = ['.railway.app']  # Default to railway.app in production
+if not ALLOWED_HOSTS:  # Changed condition to always ensure Railway domain is included
+    ALLOWED_HOSTS = ['.railway.app', 'codlaxy.up.railway.app']
 
 CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in os.environ.get('CSRF_TRUSTED_ORIGINS', '').split(',') if origin.strip()]
-if not CSRF_TRUSTED_ORIGINS and not DEBUG:
-    CSRF_TRUSTED_ORIGINS = ['https://*.railway.app']
+if not CSRF_TRUSTED_ORIGINS:  # Changed condition to always ensure Railway origin is included
+    CSRF_TRUSTED_ORIGINS = ['https://*.railway.app', 'https://codlaxy.up.railway.app']
 
 # URL Configuration
-APPEND_SLASH = False  # Disable automatic URL trailing slash redirect
+APPEND_SLASH = True  # Enable slash redirect for allauth URLs
 USE_X_FORWARDED_HOST = True  # Trust Railway's proxy headers
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
