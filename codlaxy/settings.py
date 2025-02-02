@@ -203,8 +203,8 @@ LOGIN_URL = 'account_login'
 # Static files configuration for production
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-# Security settings
-SECURE_SSL_REDIRECT = not DEBUG
+# Security settings - allow HTTP for health checks
+SECURE_SSL_REDIRECT = False  # Allow HTTP for Railway's health checks
 SECURE_HSTS_SECONDS = 31536000  # 1 year
 SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 SECURE_HSTS_PRELOAD = True
