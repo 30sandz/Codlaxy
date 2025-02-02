@@ -164,7 +164,7 @@ SITE_ID = 1
 
 # Site Configuration
 SITE_NAME = 'Codlaxy'
-SITE_DOMAIN = 'codlaxy.com'
+SITE_DOMAIN = os.environ.get('SITE_DOMAIN', 'codlaxy.up.railway.app')
 
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
@@ -179,6 +179,7 @@ EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'True') == 'True'
 EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
 DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', EMAIL_HOST_USER)
+SERVER_EMAIL = DEFAULT_FROM_EMAIL
 
 # For development, if no email credentials are set, use console backend
 if DEBUG and (not EMAIL_HOST_USER or not EMAIL_HOST_PASSWORD):
@@ -192,13 +193,21 @@ ACCOUNT_USERNAME_REQUIRED = True
 ACCOUNT_SIGNUP_PASSWORD_ENTER_TWICE = True
 ACCOUNT_SESSION_REMEMBER = True
 ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = True
-ACCOUNT_EMAIL_SUBJECT_PREFIX = ''  # Remove the [example.com] prefix
+ACCOUNT_EMAIL_SUBJECT_PREFIX = f'[{SITE_NAME}] '
 ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'https'
+ACCOUNT_ADAPTER = 'django.contrib.auth.adapters.DefaultAccountAdapter'
+ACCOUNT_EMAIL_CONFIRMATION_EXPIRE_DAYS = 3
+ACCOUNT_LOGIN_ATTEMPTS_LIMIT = 5
+ACCOUNT_LOGIN_ATTEMPTS_TIMEOUT = 300
+ACCOUNT_LOGOUT_ON_PASSWORD_CHANGE = True
+ACCOUNT_PRESERVE_USERNAME_CASING = False
+ACCOUNT_USERNAME_MIN_LENGTH = 3
 
 # Login/Logout URLs
 LOGIN_REDIRECT_URL = 'projects:project-list'
 LOGOUT_REDIRECT_URL = 'projects:landing'
 LOGIN_URL = 'account_login'
+LOGOUT_URL = 'account_logout'
 
 # Static files configuration for production
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
@@ -213,3 +222,12 @@ SECURE_CONTENT_TYPE_NOSNIFF = True
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 X_FRAME_OPTIONS = 'DENY'
+
+# Add Railway domain to ALLOWED_HOSTS and CSRF_TRUSTED_ORIGINS
+if not DEBUG:
+    railway_domain = 'codlaxy.up.railway.app'
+    if railway_domain not in ALLOWED_HOSTS:
+        ALLOWED_HOSTS.append(railway_domain)
+    railway_origin = f'https://{railway_domain}'
+    if railway_origin not in CSRF_TRUSTED_ORIGINS:
+        CSRF_TRUSTED_ORIGINS.append(railway_origin)

@@ -22,6 +22,9 @@ echo "Debug mode: $DEBUG"
 echo "Running migrations..."
 python manage.py migrate --noinput
 
+echo "Setting up site framework..."
+python manage.py setup_site
+
 echo "Collecting static files..."
 python manage.py collectstatic --noinput
 
