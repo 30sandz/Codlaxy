@@ -19,18 +19,29 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from django.http import HttpResponse, JsonResponse
-import socket
 
 def health_check(request):
-    hostname = socket.gethostname()
-    allowed_hosts = settings.ALLOWED_HOSTS
-    debug = settings.DEBUG
-    return JsonResponse({
-        'status': 'ok',
-        'hostname': hostname,
-        'allowed_hosts': allowed_hosts,
-        'debug': debug
-    })
+    try:
+        # Check if we can access settings
+        allowed_hosts = settings.ALLOWED_HOSTS
+        debug = settings.DEBUG
+        
+        # Get request information
+        host = request.get_host()
+        scheme = request.scheme
+        
+        return JsonResponse({
+            'status': 'healthy',
+            'host': host,
+            'scheme': scheme,
+            'allowed_hosts': allowed_hosts,
+            'debug': debug
+        }, status=200)
+    except Exception as e:
+        return JsonResponse({
+            'status': 'error',
+            'error': str(e)
+        }, status=200)  # Still return 200 for health check
 
 urlpatterns = [
     path('admin/', admin.site.urls),

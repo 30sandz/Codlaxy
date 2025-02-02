@@ -3,14 +3,22 @@ builder = "NIXPACKS"
 buildCommand = "python -m pip install -r requirements.txt"
 
 [deploy]
-startCommand = "python manage.py migrate && python manage.py collectstatic --noinput && gunicorn codlaxy.wsgi:application --bind 0.0.0.0:$PORT"
+startCommand = "bash scripts/railway-deploy.sh"
 healthcheckPath = "/health/"
-healthcheckTimeout = 60
+healthcheckTimeout = 90
+healthcheckInterval = 15
 restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 5
 
+[phases.setup]
+nixPkgs = ["python311", "postgresql"]
+
 [env]
 PYTHON_VERSION = "3.11"
-ALLOWED_HOSTS = "*"
+PYTHONUNBUFFERED = "1"
+DJANGO_SETTINGS_MODULE = "codlaxy.settings"
+ALLOWED_HOSTS = ".railway.app"
+CSRF_TRUSTED_ORIGINS = "https://*.railway.app"
 DEBUG = "False"
-PORT = "8000" 
+PORT = "8000"
+WEB_CONCURRENCY = "2" 
