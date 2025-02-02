@@ -18,9 +18,23 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from django.http import HttpResponse, JsonResponse
+import socket
+
+def health_check(request):
+    hostname = socket.gethostname()
+    allowed_hosts = settings.ALLOWED_HOSTS
+    debug = settings.DEBUG
+    return JsonResponse({
+        'status': 'ok',
+        'hostname': hostname,
+        'allowed_hosts': allowed_hosts,
+        'debug': debug
+    })
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('projects.urls')),
     path('accounts/', include('allauth.urls')),
+    path('health/', health_check, name='health_check'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
