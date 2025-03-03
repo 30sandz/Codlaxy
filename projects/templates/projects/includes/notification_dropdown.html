@@ -1,0 +1,93 @@
+{% load i18n %}
+
+<div class="relative inline-block text-left" x-data="{ open: false }">
+    <!-- Notification Button -->
+    <button @click="open = !open" 
+            class="relative p-1 text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            :aria-expanded="open">
+        <span class="sr-only">View notifications</span>
+        <i class="fas fa-bell text-xl"></i>
+        {% if unread_notifications_count %}
+        <span class="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-400 ring-2 ring-white"></span>
+        {% endif %}
+    </button>
+
+    <!-- Dropdown Panel -->
+    <div x-show="open"
+         @click.away="open = false"
+         x-transition:enter="transition ease-out duration-100"
+         x-transition:enter-start="transform opacity-0 scale-95"
+         x-transition:enter-end="transform opacity-100 scale-100"
+         x-transition:leave="transition ease-in duration-75"
+         x-transition:leave-start="transform opacity-100 scale-100"
+         x-transition:leave-end="transform opacity-0 scale-95"
+         class="origin-top-right absolute right-0 mt-2 w-96 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 divide-y divide-gray-100 focus:outline-none z-50"
+         role="menu"
+         aria-orientation="vertical"
+         aria-labelledby="notifications-menu-button"
+         tabindex="-1">
+        
+        <!-- Header -->
+        <div class="px-4 py-3">
+            <div class="flex items-center justify-between">
+                <h3 class="text-sm font-medium text-gray-900">Notifications</h3>
+                {% if unread_notifications_count %}
+                <form method="post" action="{% url 'projects:mark-all-read' %}" class="inline">
+                    {% csrf_token %}
+                    <button type="submit"
+                            class="text-xs text-blue-600 hover:text-blue-800">
+                        Mark all as read
+                    </button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Notifications List -->
+        <div class="max-h-96 overflow-y-auto">
+            {% for notification in recent_notifications %}
+            <div class="p-4 {% if not notification.is_read %}bg-blue-50{% endif %} hover:bg-gray-50">
+                <div class="flex items-start space-x-3">
+                    <!-- Icon -->
+                    <div class="flex-shrink-0">
+                        <div class="h-8 w-8 rounded-full bg-{{ notification.get_notification_color }}-100 flex items-center justify-center">
+                            <i class="{{ notification.get_notification_icon }} text-{{ notification.get_notification_color }}-600 text-sm"></i>
+                        </div>
+                    </div>
+
+                    <!-- Content -->
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm text-gray-900">
+                            {{ notification.message }}
+                        </p>
+                        <div class="mt-1 flex items-center justify-between">
+                            <span class="text-xs text-gray-500">
+                                {{ notification.created_at|timesince }} ago
+                            </span>
+                            {% if notification.project %}
+                            <a href="{% url 'projects:project-detail' pk=notification.project.pk %}"
+                               class="text-xs text-blue-600 hover:text-blue-800">
+                                View Project
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="px-4 py-6 text-center text-sm text-gray-500">
+                <i class="fas fa-bell-slash text-2xl text-gray-400 mb-2"></i>
+                <p>No new notifications</p>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Footer -->
+        <div class="px-4 py-3 bg-gray-50 text-right">
+            <a href="{% url 'projects:notifications' %}"
+               class="text-sm font-medium text-blue-600 hover:text-blue-800">
+                View all notifications
+            </a>
+        </div>
+    </div>
+</div> 

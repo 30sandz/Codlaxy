@@ -1,43 +1,94 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="h-full" x-data="{ darkMode: localStorage.getItem('darkMode') === 'true' }" 
+      x-init="$watch('darkMode', val => localStorage.setItem('darkMode', val))"
+      :class="{ 'dark': darkMode }">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Codlaxy - Tech Project Collaboration Platform{% endblock %}</title>
     
+    <!-- Alpine.js -->
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        dark: {
+                            '50': '#f8fafc',
+                            '100': '#f1f5f9',
+                            '200': '#e2e8f0',
+                            '300': '#cbd5e1',
+                            '400': '#94a3b8',
+                            '500': '#64748b',
+                            '600': '#475569',
+                            '700': '#334155',
+                            '800': '#1e293b',
+                            '900': '#0f172a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
     
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <!-- Custom CSS -->
     {% block extra_css %}{% endblock %}
+    
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            margin: 0;
+        }
+        
+        main {
+            flex: 1 0 auto;
+        }
+        
+        footer {
+            flex-shrink: 0;
+        }
+
+        /* Dark mode transitions */
+        .dark-mode-transition {
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+        }
+    </style>
 </head>
-<body class="bg-gray-50">
+<body class="dark-mode-transition bg-gray-50 dark:bg-dark-900 text-gray-900 dark:text-gray-100">
+    {% include 'projects/includes/loading.html' %}
     <!-- Navigation -->
-    <nav class="bg-white shadow-lg">
+    <nav class="bg-white dark:bg-dark-800 shadow-lg">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16">
                 <div class="flex">
                     <!-- Logo -->
                     <div class="flex-shrink-0 flex items-center">
-                        <a href="{% url 'projects:landing' %}" class="text-2xl font-bold text-blue-600">Codlaxy</a>
+                        <a href="{% url 'projects:landing' %}" class="text-2xl font-bold text-blue-600 dark:text-blue-400">Codlaxy</a>
                     </div>
                     
                     <!-- Navigation Links -->
                     <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
                         <a href="{% url 'projects:landing' %}" 
-                           class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                           class="border-transparent text-gray-500 dark:text-gray-300 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-100 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
                             Home
                         </a>
                         <a href="{% url 'projects:project-list' %}" 
-                           class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                           class="border-transparent text-gray-500 dark:text-gray-300 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-100 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
                             Projects
                         </a>
                         {% if user.is_authenticated %}
-                            <a href="{% url 'projects:profile' pk=user.userprofile.pk %}" 
-                               class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                            <a href="{% url 'projects:profile' username=user.username %}" 
+                               class="border-transparent text-gray-500 dark:text-gray-300 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-100 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
                                 My Profile
                             </a>
                         {% endif %}
@@ -46,37 +97,47 @@
                 
                 <!-- Right side navigation -->
                 <div class="hidden sm:ml-6 sm:flex sm:items-center space-x-4">
+                    <!-- Dark Mode Toggle -->
+                    <button @click="darkMode = !darkMode" 
+                            class="p-2 text-gray-500 dark:text-gray-300 hover:text-gray-700 dark:hover:text-gray-100 rounded-lg">
+                        <i class="fas" :class="darkMode ? 'fa-sun' : 'fa-moon'"></i>
+                    </button>
+
                     {% if user.is_authenticated %}
                         <!-- Notifications -->
                         <div class="relative">
-                            <button class="p-1 rounded-full text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                            <a href="{% url 'projects:notifications' %}" class="text-gray-500 dark:text-gray-300 hover:text-gray-700 dark:hover:text-gray-100">
                                 <span class="sr-only">View notifications</span>
+                                {% if unread_notifications_count > 0 %}
+                                <i class="fas fa-bell text-red-500 dark:text-red-400"></i>
+                                {% else %}
                                 <i class="fas fa-bell"></i>
-                            </button>
+                                {% endif%}
+                            </a>
                         </div>
 
                         <!-- Create Project Button -->
                         <a href="{% url 'projects:project-create' %}" 
-                           class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700">
+                           class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600">
                             <i class="fas fa-plus mr-2"></i>
                             Create Project
                         </a>
                         
                         <!-- Profile dropdown -->
                         <div class="relative">
-                            <div class="text-gray-500 hover:text-gray-700">
+                            <div class="text-gray-500 dark:text-gray-300 hover:text-gray-700 dark:hover:text-gray-100">
                                 {% if user.userprofile %}
-                                    <a href="{% url 'projects:profile' pk=user.userprofile.pk %}" class="flex items-center">
+                                    <a href="{% url 'projects:profile' username=user.username %}" class="flex items-center">
                                 {% else %}
                                     <a href="{% url 'projects:profile-edit' %}" class="flex items-center">
                                 {% endif %}
                                     {% if user.userprofile and user.userprofile.profile_picture %}
-                                        <img class="h-8 w-8 rounded-full object-cover border border-gray-200" 
+                                        <img class="h-8 w-8 rounded-full object-cover border border-gray-200 dark:border-dark-600" 
                                              src="{{ user.userprofile.profile_picture.url }}" 
                                              alt="{{ user.username }}">
                                     {% else %}
-                                        <div class="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center border border-gray-200">
-                                            <span class="text-blue-600 font-medium text-sm">
+                                        <div class="h-8 w-8 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center border border-gray-200 dark:border-dark-600">
+                                            <span class="text-blue-600 dark:text-blue-400 font-medium text-sm">
                                                 {{ user.username|make_list|first|upper }}
                                             </span>
                                         </div>
@@ -89,18 +150,18 @@
                         <form method="post" action="{% url 'projects:logout' %}" class="inline">
                             {% csrf_token %}
                             <button type="submit" 
-                                    class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                                    class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-dark-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-200 bg-white dark:bg-dark-700 hover:bg-gray-50 dark:hover:bg-dark-600">
                                 <i class="fas fa-sign-out-alt mr-2"></i>
                                 Logout
                             </button>
                         </form>
                     {% else %}
                         <a href="{% url 'account_login' %}" 
-                           class="text-gray-500 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium">
+                           class="text-gray-500 dark:text-gray-300 hover:text-gray-700 dark:hover:text-gray-100 px-3 py-2 rounded-md text-sm font-medium">
                             Log In
                         </a>
                         <a href="{% url 'account_signup' %}" 
-                           class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700">
+                           class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600">
                             Sign Up
                         </a>
                     {% endif %}
@@ -113,27 +174,27 @@
     {% if messages %}
         <div id="messages-container" class="fixed top-4 right-4 z-50 space-y-4">
             {% for message in messages %}
-                <div class="message-alert rounded-lg p-4 {% if message.tags == 'success' %}bg-green-100{% elif message.tags == 'error' %}bg-red-100{% else %}bg-blue-100{% endif %} shadow-lg transform transition-all duration-500 ease-in-out opacity-100 translate-x-0"
+                <div class="message-alert rounded-lg p-4 {% if message.tags == 'success' %}bg-green-100 dark:bg-green-900{% elif message.tags == 'error' %}bg-red-100 dark:bg-red-900{% else %}bg-blue-100 dark:bg-blue-900{% endif %} shadow-lg transform transition-all duration-500 ease-in-out opacity-100 translate-x-0"
                      role="alert">
                     <div class="flex">
                         <div class="flex-shrink-0">
                             {% if message.tags == 'success' %}
-                                <i class="fas fa-check-circle text-green-400 text-lg"></i>
+                                <i class="fas fa-check-circle text-green-400 dark:text-green-300 text-lg"></i>
                             {% elif message.tags == 'error' %}
-                                <i class="fas fa-exclamation-circle text-red-400 text-lg"></i>
+                                <i class="fas fa-exclamation-circle text-red-400 dark:text-red-300 text-lg"></i>
                             {% else %}
-                                <i class="fas fa-info-circle text-blue-400 text-lg"></i>
+                                <i class="fas fa-info-circle text-blue-400 dark:text-blue-300 text-lg"></i>
                             {% endif %}
                         </div>
                         <div class="ml-3">
-                            <p class="text-sm font-medium {% if message.tags == 'success' %}text-green-800{% elif message.tags == 'error' %}text-red-800{% else %}text-blue-800{% endif %}">
+                            <p class="text-sm font-medium {% if message.tags == 'success' %}text-green-800 dark:text-green-200{% elif message.tags == 'error' %}text-red-800 dark:text-red-200{% else %}text-blue-800 dark:text-blue-200{% endif %}">
                                 {{ message }}
                             </p>
                         </div>
                         <div class="ml-auto pl-3">
                             <div class="-mx-1.5 -my-1.5">
                                 <button type="button" 
-                                        class="inline-flex rounded-md p-1.5 {% if message.tags == 'success' %}text-green-500 hover:bg-green-200{% elif message.tags == 'error' %}text-red-500 hover:bg-red-200{% else %}text-blue-500 hover:bg-blue-200{% endif %} focus:outline-none"
+                                        class="inline-flex rounded-md p-1.5 {% if message.tags == 'success' %}text-green-500 dark:text-green-300 hover:bg-green-200 dark:hover:bg-green-800{% elif message.tags == 'error' %}text-red-500 dark:text-red-300 hover:bg-red-200 dark:hover:bg-red-800{% else %}text-blue-500 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-800{% endif %} focus:outline-none"
                                         onclick="this.parentElement.parentElement.parentElement.parentElement.remove()">
                                     <span class="sr-only">Dismiss</span>
                                     <i class="fas fa-times"></i>
@@ -152,21 +213,21 @@
     </main>
 
     <!-- Footer -->
-    <footer class="bg-white mt-12">
-        <div class="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
-            <div class="mt-8 border-t border-gray-200 pt-8 md:flex md:items-center md:justify-between">
+    <footer class="bg-white dark:bg-dark-800">
+        <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+            <div class="border-t border-gray-200 dark:border-dark-600 pt-8 md:flex md:items-center md:justify-between">
                 <div class="flex space-x-6 md:order-2">
-                    <a href="#" class="text-gray-400 hover:text-gray-500">
+                    <a href="#" class="text-gray-400 dark:text-gray-500 hover:text-gray-500 dark:hover:text-gray-400">
                         <i class="fab fa-github"></i>
                     </a>
-                    <a href="#" class="text-gray-400 hover:text-gray-500">
+                    <a href="#" class="text-gray-400 dark:text-gray-500 hover:text-gray-500 dark:hover:text-gray-400">
                         <i class="fab fa-twitter"></i>
                     </a>
-                    <a href="#" class="text-gray-400 hover:text-gray-500">
+                    <a href="#" class="text-gray-400 dark:text-gray-500 hover:text-gray-500 dark:hover:text-gray-400">
                         <i class="fab fa-linkedin"></i>
                     </a>
                 </div>
-                <p class="mt-8 text-base text-gray-400 md:mt-0 md:order-1">
+                <p class="mt-8 text-base text-gray-400 dark:text-gray-500 md:mt-0 md:order-1">
                     &copy; {% now "Y" %} Codlaxy. All rights reserved.
                 </p>
             </div>
@@ -193,6 +254,14 @@
                     }, 500);
                 }, 5000);
             });
+
+            // Check for saved theme preference or system preference
+            if (!localStorage.getItem('darkMode')) {
+                if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                    localStorage.setItem('darkMode', 'true');
+                    document.documentElement.__x.$data.darkMode = true;
+                }
+            }
         });
     </script>
 </body>

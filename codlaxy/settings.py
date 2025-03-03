@@ -112,6 +112,17 @@ if DATABASE_URL:
             conn_health_checks=True,
         )
     }
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.environ.get('POSTGRES_NAME', 'codlaxy_local'),
+            'USER': os.environ.get('POSTGRES_USER', 'codlaxy_local'),
+            'PASSWORD': os.environ.get('POSTGRES_PASSWORD', 'codlaxy_local'),
+            'HOST': os.environ.get('POSTGRES_HOST', 'db'),
+            'PORT': os.environ.get('POSTGRES_PORT', '5432'),
+        }
+    }
 
 
 # Password validation
@@ -212,16 +223,27 @@ LOGOUT_URL = 'account_logout'
 # Static files configuration for production
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-# Security settings - allow HTTP for health checks
-SECURE_SSL_REDIRECT = False  # Allow HTTP for Railway's health checks
-SECURE_HSTS_SECONDS = 31536000  # 1 year
-SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-SECURE_HSTS_PRELOAD = True
-SECURE_BROWSER_XSS_FILTER = True
-SECURE_CONTENT_TYPE_NOSNIFF = True
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
-X_FRAME_OPTIONS = 'DENY'
+# Security settings - allow HTTP for health checks and local development
+if DEBUG:
+    SECURE_SSL_REDIRECT = False
+    SESSION_COOKIE_SECURE = False
+    CSRF_COOKIE_SECURE = False
+    SECURE_HSTS_SECONDS = 0
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = False
+    SECURE_HSTS_PRELOAD = False
+    ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'http'
+    USE_X_FORWARDED_HOST = False
+    SECURE_PROXY_SSL_HEADER = None
+else:
+    SECURE_SSL_REDIRECT = False  # Allow HTTP for Railway's health checks
+    SECURE_HSTS_SECONDS = 31536000  # 1 year
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    SECURE_BROWSER_XSS_FILTER = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    X_FRAME_OPTIONS = 'DENY'
 
 # Add Railway domain to ALLOWED_HOSTS and CSRF_TRUSTED_ORIGINS
 if not DEBUG:

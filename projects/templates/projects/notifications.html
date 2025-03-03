@@ -1,0 +1,209 @@
+{% extends 'projects/base.html' %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-8">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="bg-white shadow-xl rounded-lg overflow-hidden">
+            <!-- Header -->
+            <div class="px-4 py-5 border-b border-gray-200 sm:px-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-900">Notifications</h1>
+                        <p class="mt-1 text-sm text-gray-600">Stay updated with your project activities</p>
+                    </div>
+                    <div class="flex space-x-2">
+                        {% if unread_count %}
+                        <form method="post" action="{% url 'projects:mark-all-read' %}">
+                            {% csrf_token %}
+                            <button type="submit"
+                                    class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                <i class="fas fa-check-double mr-2"></i>
+                                Mark all as read
+                            </button>
+                        </form>
+                        {% endif %}
+                        {% if notifications %}
+                        <form method="post" action="{% url 'projects:clear-all-notifications' %}" class="inline">
+                            {% csrf_token %}
+                            <button type="submit" onclick="return confirm('Are you sure you want to clear all notifications? This cannot be undone.')"
+                                    class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                                <i class="fas fa-trash-alt mr-2"></i>
+                                Clear all
+                            </button>
+                        </form>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notifications List -->
+            <div class="divide-y divide-gray-200">
+                {% for notification in notifications %}
+                <div class="p-4 {% if not notification.is_read %}bg-blue-50{% endif %} hover:bg-gray-50 transition-colors duration-150">
+                    <div class="flex items-start space-x-4 notification-content cursor-pointer" 
+                         data-notification-id="{{ notification.id }}"
+                         data-mark-read-url="{% url 'projects:mark-notification-read' notification.id %}">
+                        <!-- Icon -->
+                        <div class="flex-shrink-0">
+                            <div class="h-10 w-10 rounded-full bg-{{ notification.get_notification_color }}-100 flex items-center justify-center">
+                                <i class="{{ notification.get_notification_icon }} text-{{ notification.get_notification_color }}-600"></i>
+                            </div>
+                        </div>
+
+                        <!-- Content -->
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center justify-between">
+                                <p class="text-sm font-medium text-gray-900">
+                                    {% if notification.sender %}
+                                        <a href="{% url 'projects:profile' username=notification.sender.username %}" 
+                                           class="hover:text-blue-600">{{ notification.sender.username }}</a>
+                                    {% endif %}
+                                </p>
+                                <div class="flex items-center space-x-4">
+                                    <span class="text-sm text-gray-500">
+                                        {{ notification.created_at|timesince }} ago
+                                    </span>
+                                    {% if not notification.is_read %}
+                                    <form method="post" action="{% url 'projects:mark-notification-read' notification.id %}" class="inline">
+                                        {% csrf_token %}
+                                        <button type="submit"
+                                                class="text-sm text-blue-600 hover:text-blue-800">
+                                            Mark as read
+                                        </button>
+                                    </form>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <p class="mt-1 text-sm text-gray-600">
+                                {{ notification.message }}
+                            </p>
+                            {% if notification.project %}
+                            <div class="mt-2">
+                                <a href="{% url 'projects:project-detail' pk=notification.project.pk %}"
+                                   class="inline-flex items-center text-sm text-blue-600 hover:text-blue-800">
+                                    <i class="fas fa-external-link-alt mr-1"></i>
+                                    View Project
+                                </a>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="text-center py-12">
+                    <div class="mx-auto h-12 w-12 text-gray-400">
+                        <i class="fas fa-bell-slash text-3xl"></i>
+                    </div>
+                    <h3 class="mt-2 text-sm font-medium text-gray-900">No notifications</h3>
+                    <p class="mt-1 text-sm text-gray-500">
+                        You're all caught up! Check back later for new updates.
+                    </p>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Pagination -->
+            {% if is_paginated %}
+            <div class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
+                <div class="flex-1 flex justify-between sm:hidden">
+                    {% if page_obj.has_previous %}
+                    <a href="?page={{ page_obj.previous_page_number }}"
+                       class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                        Previous
+                    </a>
+                    {% endif %}
+                    {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}"
+                       class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                        Next
+                    </a>
+                    {% endif %}
+                </div>
+                <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                    <div>
+                        <p class="text-sm text-gray-700">
+                            Showing
+                            <span class="font-medium">{{ page_obj.start_index }}</span>
+                            to
+                            <span class="font-medium">{{ page_obj.end_index }}</span>
+                            of
+                            <span class="font-medium">{{ paginator.count }}</span>
+                            notifications
+                        </p>
+                    </div>
+                    <div>
+                        <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                            {% if page_obj.has_previous %}
+                            <a href="?page={{ page_obj.previous_page_number }}"
+                               class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                                <span class="sr-only">Previous</span>
+                                <i class="fas fa-chevron-left"></i>
+                            </a>
+                            {% endif %}
+
+                            {% for num in paginator.page_range %}
+                            {% if num == page_obj.number %}
+                            <span class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-blue-50 text-sm font-medium text-blue-600">
+                                {{ num }}
+                            </span>
+                            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                            <a href="?page={{ num }}"
+                               class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
+                                {{ num }}
+                            </a>
+                            {% endif %}
+                            {% endfor %}
+
+                            {% if page_obj.has_next %}
+                            <a href="?page={{ page_obj.next_page_number }}"
+                               class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                                <span class="sr-only">Next</span>
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                            {% endif %}
+                        </nav>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add click handler for notification content
+    const notificationContents = document.querySelectorAll('.notification-content');
+    notificationContents.forEach(content => {
+        content.addEventListener('click', function(e) {
+            // Don't trigger if clicking on a button or link
+            if (e.target.tagName === 'BUTTON' || e.target.tagName === 'A' || e.target.closest('button') || e.target.closest('a')) {
+                return;
+            }
+            
+            const notificationId = this.dataset.notificationId;
+            const markReadUrl = this.dataset.markReadUrl;
+            
+            // Send request to mark as read
+            fetch(markReadUrl, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    // Remove background color
+                    this.closest('div[class*="bg-blue-50"]')?.classList.remove('bg-blue-50');
+                    // Hide the mark as read button if it exists
+                    this.querySelector('button:contains("Mark as read")')?.closest('form')?.remove();
+                }
+            });
+        });
+    });
+});
+</script>
+{% endblock %} 

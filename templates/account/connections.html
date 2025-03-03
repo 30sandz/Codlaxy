@@ -1,0 +1,128 @@
+{% extends "projects/base.html" %}
+
+{% load i18n %}
+{% load socialaccount %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-12">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="bg-white shadow-xl rounded-lg overflow-hidden">
+            <!-- Header -->
+            <div class="px-4 py-5 border-b border-gray-200 sm:px-6">
+                <h1 class="text-2xl font-bold text-gray-900">
+                    {% trans "Connected Accounts" %}
+                </h1>
+                <p class="mt-1 text-sm text-gray-600">
+                    {% trans "Manage your connected third-party accounts and services." %}
+                </p>
+            </div>
+
+            <!-- Connected Accounts List -->
+            <div class="px-4 py-5 sm:p-6">
+                {% get_social_accounts request.user as accounts %}
+                
+                {% if accounts %}
+                <div class="space-y-6">
+                    <p class="text-sm text-gray-700">
+                        {% trans "You have connected the following accounts:" %}
+                    </p>
+
+                    <div class="space-y-4">
+                        {% for account in accounts %}
+                        <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                            <div class="flex items-center space-x-3">
+                                <div class="flex-shrink-0">
+                                    {% if account.get_provider_account.get_avatar_url %}
+                                    <img class="h-8 w-8 rounded-full"
+                                         src="{{ account.get_provider_account.get_avatar_url }}"
+                                         alt="{{ account.get_provider.name }}">
+                                    {% else %}
+                                    <div class="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center">
+                                        <i class="fab fa-{{ account.provider }} text-gray-500"></i>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                <div>
+                                    <p class="text-sm font-medium text-gray-900">
+                                        {{ account.get_provider.name }}
+                                    </p>
+                                    <p class="text-sm text-gray-500">
+                                        {{ account.uid }}
+                                    </p>
+                                </div>
+                            </div>
+                            <form method="post" action="{% url 'socialaccount_connections' %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="account" value="{{ account.id }}">
+                                <button type="submit" name="action_remove"
+                                        class="text-sm text-red-600 hover:text-red-800"
+                                        onclick="return confirm('{% trans 'Are you sure you want to disconnect this account?' %}')">
+                                    {% trans "Disconnect" %}
+                                </button>
+                            </form>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% else %}
+                <div class="text-center py-8">
+                    <div class="mx-auto h-12 w-12 text-gray-400">
+                        <i class="fas fa-link-slash text-3xl"></i>
+                    </div>
+                    <h3 class="mt-2 text-sm font-medium text-gray-900">{% trans "No Connected Accounts" %}</h3>
+                    <p class="mt-1 text-sm text-gray-500">
+                        {% trans "You haven't connected any third-party accounts yet." %}
+                    </p>
+                </div>
+                {% endif %}
+
+                <!-- Available Connections -->
+                <div class="mt-8 pt-6 border-t border-gray-200">
+                    <h3 class="text-lg font-medium text-gray-900">{% trans "Available Connections" %}</h3>
+                    <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        {% get_providers as socialaccount_providers %}
+                        {% for provider in socialaccount_providers %}
+                        {% if provider.id not in accounts|map_attribute:"provider" %}
+                        <div class="relative rounded-lg border border-gray-300 bg-white px-6 py-5 shadow-sm flex items-center space-x-3 hover:border-gray-400">
+                            <div class="flex-shrink-0">
+                                <div class="h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center">
+                                    <i class="fab fa-{{ provider.id }} text-gray-600 text-xl"></i>
+                                </div>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <a href="{% provider_login_url provider.id process='connect' %}"
+                                   class="focus:outline-none">
+                                    <span class="absolute inset-0" aria-hidden="true"></span>
+                                    <p class="text-sm font-medium text-gray-900">
+                                        {{ provider.name }}
+                                    </p>
+                                    <p class="text-sm text-gray-500">
+                                        {% trans "Connect your account" %}
+                                    </p>
+                                </a>
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const disconnectButtons = document.querySelectorAll('button[name="action_remove"]');
+    disconnectButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            if (!confirm('{% trans "Are you sure you want to disconnect this account?" %}')) {
+                e.preventDefault();
+            }
+        });
+    });
+});
+</script>
+{% endblock %} 

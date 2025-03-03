@@ -25,8 +25,9 @@
             {% endif %}
 
             <div class="form-group">
-                <label for="id_login">{% trans "Email or Username" %}</label>
-                <input type="text" name="login" id="id_login" required>
+                <label for="id_login">{% trans "Email or Username" %} <span class="text-sm text-gray-500">(usernames are lowercase only)</span></label>
+                <input type="text" name="login" id="id_login" required
+                       oninput="if(!this.value.includes('@')) this.value = this.value.toLowerCase()">
                 {% if form.login.errors %}
                 <div class="error-message">{{ form.login.errors.0 }}</div>
                 {% endif %}
@@ -73,4 +74,16 @@
         </div>
     </div>
 </div>
+
+<script>
+    // Handle paste events for the login field
+    document.getElementById('id_login').addEventListener('paste', function(e) {
+        // Don't convert to lowercase if it looks like an email address
+        if (!this.value.includes('@')) {
+            e.preventDefault();
+            const text = (e.clipboardData || window.clipboardData).getData('text');
+            this.value = text.toLowerCase();
+        }
+    });
+</script>
 {% endblock %} 

@@ -1,0 +1,195 @@
+<style>
+    .loading-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: #ffffff;
+        z-index: 9999;
+        opacity: 1;
+        transition: opacity 0.5s ease-in-out;
+        overflow-y: auto;
+    }
+
+    .loading-container.hidden {
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    /* Skeleton loading animation */
+    @keyframes shimmer {
+        0% {
+            background-position: -1000px 0;
+        }
+        100% {
+            background-position: 1000px 0;
+        }
+    }
+
+    .skeleton {
+        background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+        background-size: 1000px 100%;
+        animation: shimmer 2s infinite linear;
+    }
+
+    /* Project list structure loading */
+    .loading-content {
+        max-width: 1280px;
+        margin: 0 auto;
+        padding: 2rem 1rem;
+    }
+
+    .loading-search {
+        margin-bottom: 2rem;
+    }
+
+    .loading-search-bar {
+        width: 100%;
+        max-width: 24rem;
+        height: 2.5rem;
+        border-radius: 0.5rem;
+    }
+
+    .loading-filters {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 1rem;
+    }
+
+    .loading-filter {
+        width: 5rem;
+        height: 2rem;
+        border-radius: 0.375rem;
+    }
+
+    .loading-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-top: 2rem;
+    }
+
+    .loading-card {
+        background: white;
+        border-radius: 0.5rem;
+        overflow: hidden;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .loading-image {
+        width: 100%;
+        height: 12rem;
+    }
+
+    .loading-card-content {
+        padding: 1.5rem;
+    }
+
+    .loading-title {
+        height: 1.5rem;
+        width: 80%;
+        margin-bottom: 1rem;
+        border-radius: 0.25rem;
+    }
+
+    .loading-description {
+        height: 1rem;
+        margin-bottom: 0.5rem;
+        border-radius: 0.25rem;
+    }
+
+    .loading-tags {
+        display: flex;
+        gap: 0.5rem;
+        margin: 1rem 0;
+    }
+
+    .loading-tag {
+        width: 4rem;
+        height: 1.5rem;
+        border-radius: 1rem;
+    }
+
+    .loading-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem;
+        border-top: 1px solid #f0f0f0;
+    }
+
+    .loading-avatar {
+        width: 2rem;
+        height: 2rem;
+        border-radius: 50%;
+    }
+
+    .loading-date {
+        width: 5rem;
+        height: 1rem;
+        border-radius: 0.25rem;
+    }
+</style>
+
+<div class="loading-container" id="loading-screen">
+    <!-- Skeleton Loading Structure -->
+    <div class="loading-content">
+        <!-- Search and Filters -->
+        <div class="loading-search">
+            <div class="loading-search-bar skeleton"></div>
+            <div class="loading-filters">
+                <div class="loading-filter skeleton"></div>
+                <div class="loading-filter skeleton"></div>
+                <div class="loading-filter skeleton"></div>
+                <div class="loading-filter skeleton"></div>
+            </div>
+        </div>
+
+        <!-- Projects Grid -->
+        <div class="loading-grid">
+            <!-- Repeat loading cards -->
+            {% for i in '123456'|make_list %}
+            <div class="loading-card">
+                <div class="loading-image skeleton"></div>
+                <div class="loading-card-content">
+                    <div class="loading-title skeleton"></div>
+                    <div class="loading-description skeleton" style="width: 90%"></div>
+                    <div class="loading-description skeleton" style="width: 75%"></div>
+                    <div class="loading-tags">
+                        <div class="loading-tag skeleton"></div>
+                        <div class="loading-tag skeleton"></div>
+                        <div class="loading-tag skeleton"></div>
+                    </div>
+                </div>
+                <div class="loading-footer">
+                    <div class="loading-avatar skeleton"></div>
+                    <div class="loading-date skeleton"></div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<script>
+    // Function to show the loading screen
+    function showLoader() {
+        const loader = document.getElementById('loading-screen');
+        loader.classList.remove('hidden');
+    }
+
+    // Function to hide the loading screen
+    function hideLoader() {
+        const loader = document.getElementById('loading-screen');
+        loader.classList.add('hidden');
+    }
+
+    // Hide loader when page is fully loaded
+    window.addEventListener('load', function() {
+        hideLoader();
+    });
+
+    // Initially hide the loader after a short delay to see it on first load
+    setTimeout(hideLoader, 1000);
+</script> 

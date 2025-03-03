@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    image: codlaxy:dev
+    container_name: codlaxy_dev
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/app
+      - static_volume:/app/staticfiles
+      - media_volume:/app/media
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      - DEBUG=True
+      - DJANGO_SETTINGS_MODULE=codlaxy.settings
+      - DATABASE_URL=sqlite:///db.sqlite3
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:7-alpine
+    container_name: codlaxy_redis_dev
+    ports:
+      - "6379:6379"
+
+volumes:
+  static_volume:
+  media_volume: 

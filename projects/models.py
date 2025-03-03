@@ -40,7 +40,7 @@ class Project(models.Model):
     
     CATEGORY_CHOICES = [
         ('startup', 'Startup'),
-        ('skill_improvement', 'Skill Improvement'),
+        ('skill_improvement', 'Improvement'),
         ('recognition', 'Recognition'),
     ]
 
@@ -117,25 +117,104 @@ class ProjectUpdate(models.Model):
     def __str__(self):
         return f"Update for {self.project.title}: {self.title}"
 
+class Connection(models.Model):
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('accepted', 'Accepted'),
+        ('rejected', 'Rejected'),
+    ]
+    
+    requester = models.ForeignKey(User, related_name='sent_connections', on_delete=models.CASCADE)
+    receiver = models.ForeignKey(User, related_name='received_connections', on_delete=models.CASCADE)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ('requester', 'receiver')
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.requester.username} -> {self.receiver.username} ({self.status})"
+
+    @property
+    def is_mutual(self):
+        return self.status == 'accepted'
+
 class Notification(models.Model):
     NOTIFICATION_TYPES = [
-        ('application', 'New Application'),
-        ('acceptance', 'Application Accepted'),
-        ('rejection', 'Application Rejected'),
-        ('comment', 'New Comment'),
-        ('like', 'New Like'),
+        ('application', 'Project Application'),
+        ('like', 'Project Like'),
+        ('comment', 'Project Comment'),
+        ('application_accepted', 'Application Accepted'),
+        ('application_rejected', 'Application Rejected'),
+        ('team_update', 'Team Update'),
+        ('project_update', 'Project Update'),
+        ('system', 'System Notification'),
+        ('connection_request', 'Connection Request'),
+        ('connection_accepted', 'Connection Accepted'),
+        ('connection_rejected', 'Connection Rejected'),
+        ('connected_new_project', 'Connection New Project'),
+        ('connected_joined_project', 'Connection Joined Project'),
     ]
 
-    recipient = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
-    sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_notifications')
-    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='notifications', null=True)
-    notification_type = models.CharField(max_length=20, choices=NOTIFICATION_TYPES)
+    recipient = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications_received')
+    sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications_sent', null=True, blank=True)
+    project = models.ForeignKey('Project', on_delete=models.CASCADE, related_name='notifications', null=True, blank=True)
+    notification_type = models.CharField(max_length=50, choices=NOTIFICATION_TYPES)
     message = models.TextField()
     is_read = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"Notification for {self.recipient.username} from {self.sender.username}"
+    extra_data = models.JSONField(null=True, blank=True)
 
     class Meta:
         ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['-created_at']),
+            models.Index(fields=['recipient', '-created_at']),
+            models.Index(fields=['is_read', '-created_at']),
+        ]
+
+    def __str__(self):
+        return f"{self.notification_type} notification for {self.recipient.username}"
+
+    def mark_as_read(self):
+        if not self.is_read:
+            self.is_read = True
+            self.save()
+
+    @property
+    def get_notification_icon(self):
+        icon_map = {
+            'application': 'fa-user-plus',
+            'like': 'fa-heart',
+            'comment': 'fa-comment',
+            'application_accepted': 'fa-check-circle',
+            'application_rejected': 'fa-times-circle',
+            'team_update': 'fa-users',
+            'project_update': 'fa-project-diagram',
+            'connection_request': 'fa-user-plus',
+            'connection_accepted': 'fa-check-circle',
+            'connection_rejected': 'fa-times-circle',
+            'connected_new_project': 'fa-project-diagram',
+            'connected_joined_project': 'fa-users',
+        }
+        return f"fas {icon_map.get(self.notification_type, 'fa-bell')}"
+
+    @property
+    def get_notification_color(self):
+        color_map = {
+            'application': 'blue',
+            'like': 'red',
+            'comment': 'green',
+            'application_accepted': 'green',
+            'application_rejected': 'red',
+            'team_update': 'purple',
+            'project_update': 'indigo',
+            'connection_request': 'blue',
+            'connection_accepted': 'green',
+            'connection_rejected': 'red',
+            'connected_new_project': 'blue',
+            'connected_joined_project': 'purple',
+        }
+        return color_map.get(self.notification_type, 'gray')
